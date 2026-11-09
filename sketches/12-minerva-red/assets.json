@@ -1,5 +1,5 @@
 {
-  "sketch": "12-egas-cc-u-s-plans-with-eni",
+  "sketch": "12-minerva-red",
   "note": "Large, raw and licensed files live on Box (2026 Realtime Weather), not in git. Lab members add them with: node scripts/assets.mjs add 12 <path>.",
   "items": []
 }
