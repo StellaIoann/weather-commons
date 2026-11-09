@@ -2,7 +2,7 @@
 
 Author: Stella Ioannidou · Started: 2026-11-02 · Status: sketch · Stack: static HTML + JS
 
-A sketch that follows the dust of the 2024 storm that turned the sky over Athens red back to Libya. It asks what histories that dust carries: deforestation, oil mulching of the dunes, Esso's drilling, and Italian colonization.
+Minerva Red follows the dust of the 2024 duststorm that covered Greece and Libya, to trace a lineage of environmental degradation, oil mulching, colonial settlement.
 
 ## Run
 
