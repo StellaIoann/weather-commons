@@ -15,7 +15,7 @@ const STEPS = [
     kind: 'Landsat pictures and flare detections · observed  /  gas volume, VIIRS Nightfire · observed',
     text: 'The oil field. Beside it, the 2 km around its three gas flares, enlarged ten times: a point is a 30 m pixel seen burning that year, sized by the share of satellite passes that caught it.' },
   { name: 'Film', view: 'region', layer: null,
-    video: 'https://player.vimeo.com/video/VIDEO_ID',      // paste the link from Vimeo: Share → Embed, the src="…" part
+    video: 'https://player.vimeo.com/video/1249374485?autopause=0&amp;player_id=0&amp;app_id=58479',      // paste the link from Vimeo: Share → Embed, the src="…" part
     kind: 'Film · Stella Ioannidou, 2026',
     text: 'tk' },
   { name: 'Explore', view: 'region', layer: null, free: true,
