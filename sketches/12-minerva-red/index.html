@@ -6,6 +6,81 @@
 <title>12 · Minerva Red · Realtime Weather</title>
 <!-- style.css is the shared Realtime Weather look, copied into this folder. Add your own styles below it. -->
 <link rel="stylesheet" href="style.css">
+<style>
+/* The view takes the whole screen, on a black ground, after sketch 04: a masthead top-left, the story in a white
+   box on the right, and a white bar along the bottom with the clock and the numbered steps.
+   Type: Helvetica, regular weight only, −2 % tracking; hierarchy by size and position. Colour belongs to the layers. */
+body { overflow-x: hidden; }
+.viewer { --paper: #fff; --ink: #fff; --fg: #000; --mute: #7a7a7a; --bar: 104px;
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: relative; width: 100vw; margin-left: calc(50% - 50vw); height: 100vh; min-height: 560px; background: #000; color: var(--ink);
+  font: 400 12px/1.15 var(--sans); letter-spacing: -.02em; overflow: hidden; -webkit-font-smoothing: antialiased; user-select: none; }
+.viewer button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; letter-spacing: inherit; }
+#stage { position: absolute; inset: 0 0 var(--bar) 0; }
+#stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+#mast { position: absolute; left: 20px; top: 18px; max-width: 46ch; pointer-events: none; }
+#mast h1 { margin: 0 0 8px; font: 400 24px/1 var(--sans); text-transform: uppercase; letter-spacing: -.02em; }
+#mast p { margin: 0; font-size: 12px; line-height: 1.15; max-width: none; }
+#mast .by { margin-top: 6px; color: var(--mute); font-size: 8px; }
+#key { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; font-size: 8px; }
+#key span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+#key i { display: inline-block; width: 7px; height: 7px; }
+#film { position: absolute; left: 20px; top: 18px; bottom: 20px; right: 440px; background: #000; z-index: 1; }
+#film[hidden], #film [hidden] { display: none; }
+#film iframe { width: 100%; height: 100%; border: 0; display: block; }
+#film-note { padding: 20px; color: var(--mute); }
+#hint { position: absolute; left: 20px; bottom: 30px; font-size: 8px; color: var(--mute); pointer-events: none; }
+/* the column on the right: the story, then the archive */
+#side { position: absolute; right: 20px; top: 18px; bottom: 20px; width: 400px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+#side > * { pointer-events: auto; background: var(--paper); color: var(--fg); padding: 12px 14px; }
+#insets { margin-top: 10px; }
+#insets[hidden], #insets canvas[hidden], #itabs[hidden] { display: none; }
+#itabs { display: flex; gap: 12px; margin-bottom: 5px; }
+#itabs button { color: var(--mute); }
+#itabs button[aria-pressed="true"] { color: var(--fg); }
+#insets canvas { display: block; width: 100%; background: #000; }
+#icap { font-size: 8px; color: var(--mute); margin-top: 3px; }
+#media { flex: 1; min-height: 0; overflow: auto; font-size: 12px; }
+#media[hidden] { display: none; }
+#media-head { display: flex; gap: 12px; align-items: baseline; margin-bottom: 8px; color: var(--mute); font-size: 8px; }
+#media-head span:first-child { color: var(--fg); text-transform: uppercase; margin-right: auto; font-size: 12px; }
+#media-head button { font-size: 12px; color: var(--fg); }
+#media img { display: block; width: 100%; height: auto; margin-bottom: 8px; }
+#media p { margin: 0 0 4px; font-size: 12px; line-height: 1.15; }
+#media .hl { font-size: 18px; line-height: 1.1; margin: 2px 0 8px; }
+#media .cr { font-size: 8px; line-height: 1.3; color: var(--mute); }
+#media a { border-bottom: 1px solid currentColor; text-decoration: none; }
+#story h2 { margin: 0 0 2px; padding: 0; border: 0; font: 400 18px/1.1 var(--sans); text-transform: none; letter-spacing: -.02em; }
+#story .meta { font-size: 8px; color: var(--mute); margin-bottom: 8px; }
+#story p { margin: 0; font-size: 12px; line-height: 1.15; }
+#clock { position: absolute; left: 0; right: 0; bottom: 0; height: var(--bar); background: var(--paper); color: var(--fg); padding: 0 20px; }
+#rail { display: flex; align-items: center; gap: 16px; height: 72px; }
+#rail[data-off] > :not(#date) { visibility: hidden; }
+#play { flex: 0 0 auto; text-align: left; white-space: nowrap; min-width: 64px; }
+#track { position: relative; flex: 1; min-width: 0; height: 44px; }
+#track input { position: absolute; left: 0; right: 0; top: 10px; width: 100%; -webkit-appearance: none; appearance: none; height: 14px; background: none; margin: 0; cursor: pointer; }
+#track input::-webkit-slider-runnable-track { height: 1px; background: var(--fg); }
+#track input::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--fg); margin-top: -5px; }
+#track input::-moz-range-track { height: 1px; background: var(--fg); }
+#track input::-moz-range-thumb { width: 11px; height: 11px; border: 0; border-radius: 50%; background: var(--fg); }
+#ticks { position: absolute; left: 5px; right: 5px; top: 22px; height: 20px; pointer-events: none; }
+#ticks i { position: absolute; top: 0; width: 1px; height: 4px; background: var(--fg); }
+#ticks i.l { height: 7px; }
+#ticks span { position: absolute; top: 9px; transform: translateX(-50%); font-size: 10px; white-space: nowrap; }
+#date { flex: 0 0 auto; text-align: right; min-width: 15ch; }
+#date b { display: block; font-weight: 400; font-size: 18px; line-height: 1.1; }
+#date span { color: var(--mute); font-size: 8px; }
+#steps { display: flex; gap: 2px; align-items: center; height: 32px; border-top: 1px solid var(--fg); }
+#steps button { min-width: 22px; height: 22px; padding: 0 6px; text-align: center; color: var(--mute); }
+#steps button[aria-current="true"] { background: var(--fg); color: var(--paper); }
+#steps .nm { margin-left: 10px; color: var(--fg); }
+@media (max-width: 900px) {
+  #side { left: 20px; right: 20px; top: auto; bottom: 12px; width: auto; }
+  #media, #insets { display: none; }
+  #film { right: 20px; bottom: 140px; }
+  #key, #hint, #mast p { display: none; }
+}
+</style>
 </head>
 <body>
 <main>
@@ -20,62 +95,51 @@
   </nav>
 </header>
 
-<h1>Minerva Red</h1>
-
-<!-- 1. Event: what are you looking at, and what do you want to find out? -->
-<p class="lede">Minerva Red follows the dust of the 2024 duststorm that covered Greece and Libya, to trace a lineage of environmental degradation, oil mulching, colonial settlement.</p>
-<p class="muted small">12 · Stella Ioannidou · started 2026-11-02</p>
-
-<!-- 2. Simulate: a first model. This placeholder shows dots drifting in one steady wind. -->
-<h2>Simulate</h2>
-<canvas id="view" width="1200" height="600"></canvas>
-<p class="label">Synthetic: a steady east wind, made up for the starter template. Not observed data, and not the 2024 dust yet.</p>
+<!-- 1–2. Event and Simulate: the view. Steps and texts are at the top of app.js. -->
+<section class="full viewer" aria-label="Minerva Red: map from Libya to Crete">
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="mast">
+      <h1>Minerva Red</h1>
+      <p>Minerva Red follows the dust of the 2024 duststorm that covered Greece and Libya, to trace a lineage of environmental degradation, oil mulching, colonial settlement.</p>
+      <p class="by">12 · Stella Ioannidou · started 2026-11-02</p>
+      <div id="key"></div>
+    </div>
+    <div id="film" hidden><iframe id="vimeo" src="about:blank" title="Film" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      <p id="film-note" hidden>Add the film's Vimeo link in app.js (the Film step).</p></div>
+    <div id="hint">Drag to turn · shift-drag to move · scroll to zoom · double-click to reset · ← → steps</div>
+    <div id="side">
+      <aside id="story"><h2 id="st-title"></h2><div class="meta" id="kind"></div><p id="text"></p>
+        <div id="insets" hidden>
+          <canvas id="ang"></canvas><canvas id="top" hidden></canvas>
+          <div id="icap"></div>
+        </div>
+      </aside>
+      <aside id="media" hidden>
+        <div id="media-head"><span>Archive</span><span id="mcount"></span><button id="mprev" aria-label="Previous">←</button><button id="mnext" aria-label="Next">→</button></div>
+        <div id="mbody"></div>
+      </aside>
+    </div>
+  </div>
+  <div id="clock">
+    <div id="rail"><button id="play">▶ Run</button><div id="track"><input id="t" type="range" aria-label="Time"><div id="ticks"></div></div>
+      <div id="date"><b id="tl"></b><span id="sub"></span></div></div>
+    <nav id="steps"></nav>
+  </div>
+</section>
 
 <!-- 3. Situate: where, when, who. Add a map, places, institutions, dates. -->
 <h2>Situate</h2>
-<p>Where the dust rose in Libya, where it fell in Athens, and the land between: who cleared it, drilled it, oiled it and ruled it, and when.</p>
+<p>tk</p>
 
 <!-- 4. Narrate: the story in a few sentences, and what the model cannot show. -->
 <h2>Narrate</h2>
-<p>Tell the story in a few sentences.</p>
-
-<h2>Sources and limits</h2>
-<ul>
-  <li>Moving dots (Simulate): synthetic, made up for the starter template. They are not dust, wind or any measured flow.</li>
-  <li>The 2024 dust storm over Athens and Libya: exact dates and observations (satellite images, dust forecasts, air quality readings) to add.</li>
-  <li>Deforestation, oil mulching, Esso drilling and Italian colonization in Libya: interpretive threads from Stella's research. Sources, places and dates to check.</li>
-</ul>
-<p>What this sketch cannot show: so far, nothing here is observed or modelled data. Dust does not carry a record of the land it came from on its own; linking it to these histories is an interpretation to be argued with sources.</p>
+<p>tk</p>
 
 <footer class="site-footer">
   <p>Minerva Red · Stella Ioannidou · Realtime Weather working group, Weather Commons</p>
 </footer>
 </main>
-<script>
-  // A tiny simulation: dots carried by a steady wind, with a little random spread.
-  // Replace it with your own model. Load your own files with relative paths, e.g. fetch('data/my-file.json').
-  const canvas = document.getElementById('view');
-  const ctx = canvas.getContext('2d');
-  const ink = getComputedStyle(document.body).color;           // black, or white in dark mode
-  const paper = getComputedStyle(document.body).backgroundColor;
-  const wind = { east: 1.2, north: 0.2 }; // pixels per frame (synthetic)
-  const spread = 0.6;                      // random wobble per frame
-  const dots = Array.from({ length: 1500 }, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height }));
-
-  function step() {
-    ctx.globalAlpha = 0.15;                // fade old positions into trails
-    ctx.fillStyle = paper;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = ink;
-    for (const d of dots) {
-      d.x = (d.x + wind.east + (Math.random() - 0.5) * spread + canvas.width) % canvas.width;
-      d.y = (d.y - wind.north + (Math.random() - 0.5) * spread + canvas.height) % canvas.height;
-      ctx.fillRect(d.x, d.y, 2, 2);
-    }
-    requestAnimationFrame(step);
-  }
-  step();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
